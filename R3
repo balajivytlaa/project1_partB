@@ -1,0 +1,76 @@
+import random
+
+class Node(int):
+    def _init_(self, id):
+        self.id = id
+        self.neighbors = []
+
+    def add_neighbor(self, neighbor):
+        self.neighbors.append(neighbor)
+
+class Vehicle:
+    def _init_(self, id):
+        self.id = id
+        self.trips = 0
+        self.distance = 0
+
+    def make_trip(self, distance):
+        self.trips += 1
+        self.distance += distance
+
+def generate_graph(num_nodes, connectivity):
+    graph = []
+    for i in range(num_nodes):
+        node = Node(i)
+        graph.append(node)
+
+    for node in graph:
+        num_neighbors = random.randint(1, connectivity)
+        for _ in range(num_neighbors):
+            neighbor = random.choice(graph)
+            if neighbor != node and neighbor not in node.neighbors:
+                node.add_neighbor(neighbor)
+                neighbor.add_neighbor(node)
+
+    return graph
+
+def generate_reservations(num_reservations):
+    reservations = []
+    for _ in range(num_reservations):
+        source = random.choice(graph)
+        destination = random.choice(graph)
+        while destination == source:
+            destination = random.choice(graph)
+        reservations.append((source, destination))
+    return reservations
+
+def simulate(graph, num_vehicles, num_reservations):
+    vehicles = []
+    for i in range(num_vehicles):
+        vehicle = Vehicle(i)
+        vehicles.append(vehicle)
+
+    reservations = generate_reservations(num_reservations)
+
+    for reservation in reservations:
+        source, destination = reservation
+        distance = calculate_distance(source, destination)
+        vehicle = random.choice(vehicles)
+        vehicle.make_trip(distance)
+
+    total_distance = sum(vehicle.distance for vehicle in vehicles)
+    total_trips = sum(vehicle.trips for vehicle in vehicles)
+    average_distance = total_distance / num_vehicles
+    average_trips = total_trips / num_vehicles
+
+    return average_distance, average_trips
+
+def calculate_distance(source, destination):
+    # calculate distance between two nodes
+    return abs(destination.id - source.id)
+
+# 100 nodes with 3 connectivity and 30 vehicles
+graph = generate_graph(100,3)
+average_distance, average_trips = simulate(graph, 30, random.randint(450, 600))
+print("Average distance traveled per day:", average_distance)
+print("Average number of trips per day:", average_trips)
