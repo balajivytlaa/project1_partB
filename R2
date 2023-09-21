@@ -1,0 +1,77 @@
+import networkx as nx
+
+G = nx.Graph()
+G.add_nodes_from([0,1, 2, 3, 4, 5, 6, 7, 8, 9])
+G.add_edges_from([(0, 3, {'weight': 0.1}), (0, 8, {'weight': 0.8}), (3, 8, {'weight': 0.8}), (8, 2, {'weight': 0.7}),
+                  (8, 1, {'weight': 1.0}), (8, 6, {'weight': 0.7}), (1, 6, {'weight': 1.0}), (1, 4, {'weight': 0.6}),
+                  (4, 6, {'weight': 0.5}), (6, 7, {'weight': 0.9}), (4, 7, {'weight': 0.4}), (4, 5, {'weight': 0.5}), (4, 9, {'weight': 1.0}),(7, 5, {'weight': 0.8}),(7, 9, {'weight': 0.4})])
+
+S1 = []
+S2 = []
+i=0
+van1_position=0
+van2_position=0
+
+R1 = []
+R2 = []
+
+clock_ticks = 3
+
+requests = {
+    1: {'pickup': 8, 'dropoff': 9},
+    2: {'pickup': 3, 'dropoff': 6},
+    3: {'pickup': 4, 'dropoff': 7},
+    4: {'pickup': 2, 'dropoff': 4},
+    5: {'pickup': 1, 'dropoff': 7},
+    6: {'pickup': 1, 'dropoff': 9}
+}
+
+
+def find_shortest_path(source, target):
+    return nx.shortest_path(G, source, target, weight='weight')
+
+
+def update_service_queues_and_paths():
+
+
+    if len(S1) > 0:
+        S1.pop(0)
+    if len(requests) > 0:
+        S1.append(requests.pop(1+i))
+
+
+    if len(S2) > 0:
+        S2.pop(0)
+    if len(requests) > 0:
+        S2.append(requests.pop(2+i))
+
+
+    if len(R1) > 0:
+        R1.pop(0)
+    if len(S1) > 0:
+        R1.append(find_shortest_path(van1_position, S1[0]['pickup']))
+        R1.append(find_shortest_path(S1[0]['pickup'], S1[0]['dropoff']))
+
+
+
+    if len(R2) > 0:
+        R2.pop(0)
+    if len(S2) > 0:
+        R2.append(find_shortest_path(van2_position , S2[0]['pickup']))
+        R2.append(find_shortest_path(S2[0]['pickup'], S2[0]['dropoff']))
+
+
+
+for tick in range(1, clock_ticks + 1):
+    print(f"At clock tick {tick}:")
+
+
+    update_service_queues_and_paths()
+    i=i+2
+    van1_position = S1[0]['dropoff']
+    van2_position = S2[0]['dropoff']
+
+    print(f"Contents of service queue S1: {S1}")
+    print(f"Contents of service queue S2: {S2}")
+    print(f"Contents of path R1: {R1}")
+    print(f"Contents of path R2: {R2}")
